@@ -181,7 +181,7 @@ body.panelhide #panel{display:none}
 <div id="app">
   <aside id="panel" aria-label="ข้อมูลโรงเรียน">
     <div id="sr" class="sr" role="status" aria-live="polite" aria-atomic="true"></div>
-    <p class="eyebrow"><span id="modeLbl">แผนเผชิญเหตุ</span> · แบบจำลอง 3 มิติ · <span id="ver">เวอร์ชัน 23 (22 ต.ค. 69)</span></p>
+    <p class="eyebrow"><span id="modeLbl">แผนเผชิญเหตุ</span> · แบบจำลอง 3 มิติ · <span id="ver">เวอร์ชัน 24 (22 ต.ค. 69)</span></p>
     <h1 class="school">โรงเรียนมัธยมพัชรกิติยาภา 2 กำแพงเพชร</h1>
     <p class="sub">ต.ประชาสุขสันต์ อ.ลานกระบือ จ.กำแพงเพชร</p>
     <div id="mode" role="group" aria-label="เลือกการใช้งาน"><button type="button" data-m="tour" aria-pressed="false">นำชมโรงเรียน</button><button type="button" data-m="emg" aria-pressed="true">แผนเผชิญเหตุ</button></div>
@@ -2133,13 +2133,13 @@ function showRooms(id){
   el.innerHTML=h+evacCard(id);
   var bi=$("bIn");if(bi)bi.addEventListener("click",function(){openInside(id);});
 }
-function select(id){
+function select(id,far){
   if(document.body.classList.contains("panelhide")&&id)setPanel(true);
   if(/^[rf]:/.test(id))return;
   var p=pinById(id);if(!p)return;announce("เลือก "+(p.el.getAttribute("aria-label")||""));if(inside&&inside!==id)closeInside();if(inside===id){renderInsidePanel();return;}selRoom=null;selected=id;showRooms(id);drawRoutes();
   pinList.forEach(function(q){q.el.classList.toggle("sel",q.id===id);});
   Array.prototype.forEach.call(bodyEl.querySelectorAll("button[data-id]"),function(btn){btn.setAttribute("aria-current",btn.getAttribute("data-id")===id?"true":"false");});
-  var t=root.localToWorld(p.pos.clone()),dist=75;
+  var t=root.localToWorld(p.pos.clone()),dist=far||75;
   var dir=camera.position.clone().sub(controls.target).normalize();
   var tgt=[t.x,0,t.z];var pos=[t.x+dir.x*dist,Math.max(40,dir.y*dist),t.z+dir.z*dist];
   flyTo(pos,tgt,800);
@@ -2391,10 +2391,16 @@ function frame(now){
   }
 }
 resize();
-var start=(location.hash||"").replace("#","");
+/* deep links: #scene or #scene&pin (QR codes on the printed fire-escape signs use #exits&b2 etc.) */
+function openHash(first){
+  var h=decodeURIComponent((location.hash||"").replace("#","")).split("&"),sc=h[0],pin=h[1];
+  if(scenes.some(function(x){return x.id===sc;})){if(first||!cur||cur.id!==sc)setScene(sc,false);}
+  else if(first)setScene("overview",false);
+  if(pin&&pinById(pin)){select(pin,160);var d=$("detail");if(d&&d.scrollIntoView)setTimeout(function(){d.scrollIntoView({block:"start"});},50);}
+}
 camera.position.set(120,300,380);controls.target.set(-40,0,-5);
-setScene(scenes.some(function(s){return s.id===start;})?start:"overview",false);
-window.addEventListener("hashchange",function(){var h=(location.hash||"").replace("#","");if(scenes.some(function(x){return x.id===h;})&&(!cur||cur.id!==h))setScene(h,false);});
+openHash(true);
+window.addEventListener("hashchange",function(){openHash(false);});
 requestAnimationFrame(frame);
 /* ---------- offline (service worker caches the page and the CDN scripts after the first visit) ---------- */
 (function(){
