@@ -12,7 +12,7 @@
 /* Layout: left briefing panel + full-height 3D stage; scene tabs float at the stage bottom; panel becomes a bottom sheet on phones */
 :root{
   --bg:#e9ede8; --panel:#f5f7f3; --ink:#18271f; --muted:#56655d; --line:#d0d7cd;
-  --brand:#1e4a3c; --brand-ink:#ffffff; --hazard:#c8431a; --safe:#0c8a8c; --warn:#c98f10;
+  --brand:#1e4a3c; --brand-ink:#ffffff; --hazard:#c8431a; --safe:#0a6f72; --warn:#c98f10; --on-hazard:#ffffff; --on-safe:#ffffff; --edge:#7a8780;
   --chip:#ffffffd9; --chip-ink:#18271f; --sky-a:#d7e4dd; --sky-b:#f3f6f1;
   --font-ui:"Noto Sans Thai","Sarabun","Tahoma",system-ui,sans-serif;
   --font-head:"Noto Serif Thai","Noto Sans Thai","Tahoma",serif;
@@ -20,13 +20,13 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0e1512; --panel:#15201b; --ink:#e5ece7; --muted:#9baba2; --line:#27352f;
-    --brand:#8fd0b3; --brand-ink:#0e1512; --hazard:#ff7a4d; --safe:#3fc7c9; --warn:#e9b94a;
+    --brand:#8fd0b3; --brand-ink:#0e1512; --hazard:#ff7a4d; --safe:#3fc7c9; --warn:#e9b94a; --on-hazard:#0e1512; --on-safe:#0e1512; --edge:#6a7f74;
     --chip:#15201be6; --chip-ink:#e5ece7; --sky-a:#1b2a24; --sky-b:#0c1411; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0e1512; --panel:#15201b; --ink:#e5ece7; --muted:#9baba2; --line:#27352f;
-  --brand:#8fd0b3; --brand-ink:#0e1512; --hazard:#ff7a4d; --safe:#3fc7c9; --warn:#e9b94a;
+  --brand:#8fd0b3; --brand-ink:#0e1512; --hazard:#ff7a4d; --safe:#3fc7c9; --warn:#e9b94a; --on-hazard:#0e1512; --on-safe:#0e1512; --edge:#6a7f74;
   --chip:#15201be6; --chip-ink:#e5ece7; --sky-a:#1b2a24; --sky-b:#0c1411; color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -36,17 +36,36 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);f
 #panel{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:20px max(18px,env(safe-area-inset-left,0px)) 28px 18px;min-width:0}
 .eyebrow{font-size:12px;letter-spacing:.06em;color:var(--hazard);font-weight:600;margin:0 0 4px}
 .school{font-family:var(--font-head);font-size:22px;line-height:1.25;margin:0 0 2px;color:var(--ink);text-wrap:balance}
-.sub{font-size:13px;color:var(--muted);margin:0 0 16px}
+.sub{font-size:13px;color:var(--muted);margin:0 0 12px}
+/* mode switch: tour (brand green) vs emergency (hazard) */
+#mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 14px;border:1px solid var(--edge);border-radius:10px}
+#mode button{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;display:grid;place-items:center;border-radius:7px;font-weight:700;font-size:14px;color:var(--muted);text-align:center;padding:4px 8px}
+#mode button:focus-visible{outline:3px solid var(--warn);outline-offset:1px}
+#mode button[data-m="tour"][aria-pressed="true"]{background:var(--brand);color:var(--brand-ink)}
+#mode button[data-m="emg"][aria-pressed="true"]{background:var(--hazard);color:var(--on-hazard)}
+#panel{border-top:4px solid var(--hazard)}
+body.m-tour #panel{border-top-color:var(--brand)}
+body.m-tour .eyebrow{color:var(--brand)}
+body.m-tour #bRoutes{display:none}
+.list li.hd{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted);margin:10px 0 0}
+.list li.hd:first-child{margin-top:0}
+.tourctl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin:0 0 12px}
+.tourctl .pos{font-size:13px;color:var(--muted);text-align:center}
+.tourctl button{min-height:44px;box-sizing:border-box;display:inline-grid;place-items:center}
+.tourctl .ghost{margin:0}
+.tourctl button:disabled{opacity:.4;cursor:default}
+.safe-note{margin:8px 0 0;padding:8px 10px;border-left:3px solid var(--hazard);background:color-mix(in srgb,var(--hazard) 9%,transparent);font-size:13px;border-radius:0 6px 6px 0}
+.safe-note button{all:unset;cursor:pointer;color:var(--ink);font-weight:700;text-decoration:underline}
 #sceneHead{border-top:1px solid var(--line);padding-top:16px}
 #sceneHead h2{font-family:var(--font-head);font-size:20px;line-height:1.3;margin:0 0 6px;text-wrap:balance}
 #sceneHead p{margin:0 0 12px;color:var(--ink)}
 .list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.list button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:30px 1fr;gap:10px;width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:transparent}
+.list button{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:30px 1fr;gap:10px;width:100%;padding:8px 10px;border:1px solid var(--edge);border-radius:8px;background:transparent}
 .list button:hover,.list button:focus-visible{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 8%,transparent)}
 .list button[aria-current="true"]{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 14%,transparent)}
 .list .k{display:grid;place-items:center;width:26px;height:26px;border-radius:13px;background:var(--brand);color:var(--brand-ink);font-weight:700;font-size:13px}
-.list .k.g{background:var(--safe);color:#fff;border-radius:6px}
-.list .k.h{background:var(--hazard);color:#fff;border-radius:6px}
+.list .k.g{background:var(--safe);color:var(--on-safe);border-radius:6px}
+.list .k.h{background:var(--hazard);color:var(--on-hazard);border-radius:6px}
 .list .t{font-weight:600;font-size:14px;line-height:1.35}
 .list .d{font-size:12.5px;color:var(--muted);line-height:1.45}
 .tbl{width:100%;border-collapse:collapse;font-size:13px;margin:2px 0 10px}
@@ -77,13 +96,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);f
 #layerMenu{position:absolute;top:52px;right:12px;z-index:5;min-width:190px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:0 4px 16px #0004}
 #layerMenu[hidden]{display:none}
 #layerMenu label{display:flex;align-items:center;gap:10px;min-height:38px;font-size:14px;cursor:pointer}
-.pin.r .b{background:#ffffff;color:#18271f;border:1.5px solid #18271f;height:20px;min-width:20px;font-size:11px;padding:0 4px;border-radius:4px}
+.pin.r .b{background:#ffffff;color:#18271f;border:1.5px solid #18271f;height:20px;min-width:20px;font-size:12px;padding:0 4px;border-radius:4px}
 .pin.r .n{display:none}
 .pin.r:hover .n,.pin.r.sel .n{display:block}
 .pin.r.sel .b{background:var(--warn);color:#18271f}
-.pin.f .b{background:#18271f;color:#fff;border-radius:4px;font-size:11px;height:20px}
+.pin.f .b{background:#18271f;color:#fff;border-radius:4px;font-size:12px;height:20px}
 .search{position:relative;margin:0 0 14px}
-.search input{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+.search input{width:100%;box-sizing:border-box;min-height:44px;padding:9px 12px;border:1px solid var(--edge);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
 .search input:focus{outline:2px solid var(--brand);outline-offset:1px}
 .btnrow{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
 .primary{all:unset;cursor:pointer;padding:8px 14px;border-radius:8px;background:var(--brand);color:var(--brand-ink);font-size:13.5px;font-weight:700}
@@ -110,17 +129,22 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);f
 .pin{position:absolute;left:0;top:0;display:flex;align-items:center;gap:5px;pointer-events:auto;cursor:pointer;transform:translate(-50%,-50%);will-change:transform;white-space:nowrap}
 .pin .b{display:grid;place-items:center;min-width:24px;height:24px;padding:0 5px;border-radius:12px;background:var(--brand);color:var(--brand-ink);font-weight:700;font-size:12.5px;border:2px solid var(--panel);box-shadow:0 1px 4px #0005}
 .pin .n{font-size:12px;font-weight:600;padding:2px 8px;border-radius:5px;background:var(--chip);color:var(--chip-ink);box-shadow:0 1px 3px #0003}
-.pin.g .b{background:var(--safe);color:#fff;border-radius:6px}
-.pin.a .b{background:var(--safe);color:#fff;border-radius:6px;height:28px;min-width:28px}
-.pin.h .b{background:var(--hazard);color:#fff;border-radius:6px}
+.pin.g .b{background:var(--safe);color:var(--on-safe);border-radius:6px}
+.pin.a .b{background:var(--safe);color:var(--on-safe);border-radius:6px;height:28px;min-width:28px}
+.pin.h .b{background:var(--hazard);color:var(--on-hazard);border-radius:6px}
 .pin.sel .b{outline:3px solid var(--warn);outline-offset:1px}
+.pin .b{position:relative}
+.pin .b::after{content:"";position:absolute;inset:-10px}              /* 44px touch target around the 24px badge */
+.pin:focus{outline:none}
+.pin:focus-visible .b{outline:3px solid var(--ink);outline-offset:2px;box-shadow:0 0 0 6px var(--warn)}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .pin.dim{opacity:.28}
 body.nonames .pin .n{display:none}
 body.nonames .pin.sel .n{display:block}
 @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--hazard) 60%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
 .pin.h .b,.pin.a .b{animation:pulse 1.8s infinite}
 #tools{position:absolute;top:12px;right:12px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-#tools button,#tabs button{all:unset;box-sizing:border-box;cursor:pointer;min-height:36px;display:inline-flex;align-items:center;padding:7px 12px;border-radius:8px;background:var(--chip);color:var(--chip-ink);font-size:13px;font-weight:600;box-shadow:0 1px 4px #0003;border:1px solid var(--line)}
+#tools button,#tabs button{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;display:inline-flex;align-items:center;padding:7px 12px;border-radius:8px;background:var(--chip);color:var(--chip-ink);font-size:13px;font-weight:600;box-shadow:0 1px 4px #0003;border:1px solid var(--edge)}
 #tools button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
 #tools button:focus-visible,#tabs button:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
 #tabs{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;overflow-x:auto;padding:4px;scrollbar-width:none;justify-content:center}
@@ -130,7 +154,7 @@ body.nonames .pin.sel .n{display:block}
 #hint{position:absolute;left:14px;bottom:calc(64px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--muted);background:var(--chip);padding:3px 8px;border-radius:5px}
 #compass{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;align-items:center;gap:0;font-size:11px;font-weight:700;color:var(--ink);pointer-events:none}
 #compass svg{display:block;filter:drop-shadow(0 1px 3px #0003)}
-#scalebar{position:absolute;left:14px;bottom:calc(92px + env(safe-area-inset-bottom,0px));font-size:11.5px;font-weight:600;color:var(--ink);background:var(--chip);padding:3px 8px 4px;border-radius:5px;pointer-events:none}
+#scalebar{position:absolute;left:14px;bottom:calc(92px + env(safe-area-inset-bottom,0px));font-size:12px;font-weight:600;color:var(--ink);background:var(--chip);padding:3px 8px 4px;border-radius:5px;pointer-events:none}
 #scalebar i{display:block;height:6px;border:2px solid var(--ink);border-top:0;margin-bottom:2px;width:60px}
 #err{position:absolute;inset:0;display:none;place-items:center;padding:24px;text-align:center;color:var(--ink)}
 body.panelhide #app{grid-template-columns:1fr!important;grid-template-rows:minmax(0,1fr)!important}
@@ -148,17 +172,19 @@ body.panelhide #panel{display:none}
   #compass{top:auto;left:auto;right:8px;bottom:60px}
   #tools{top:8px;right:8px}
   #layerMenu{top:48px;right:8px}
-  #tools button,#tabs button{min-height:40px}
+  #tools button,#tabs button{min-height:44px}
   #tabs{bottom:8px;justify-content:flex-start}
 }
 @media (prefers-reduced-motion:reduce){.pin.h .b,.pin.a .b{animation:none}}
 </style>
 
 <div id="app">
-  <aside id="panel" aria-live="polite">
-    <p class="eyebrow">แผนเผชิญเหตุ · แบบจำลอง 3 มิติ · <span id="ver">เวอร์ชัน 21 (22 ต.ค. 69)</span></p>
+  <aside id="panel" aria-label="ข้อมูลโรงเรียน">
+    <div id="sr" class="sr" role="status" aria-live="polite" aria-atomic="true"></div>
+    <p class="eyebrow"><span id="modeLbl">แผนเผชิญเหตุ</span> · แบบจำลอง 3 มิติ · <span id="ver">เวอร์ชัน 23 (22 ต.ค. 69)</span></p>
     <h1 class="school">โรงเรียนมัธยมพัชรกิติยาภา 2 กำแพงเพชร</h1>
     <p class="sub">ต.ประชาสุขสันต์ อ.ลานกระบือ จ.กำแพงเพชร</p>
+    <div id="mode" role="group" aria-label="เลือกการใช้งาน"><button type="button" data-m="tour" aria-pressed="false">นำชมโรงเรียน</button><button type="button" data-m="emg" aria-pressed="true">แผนเผชิญเหตุ</button></div>
     <div class="search"><input id="q" type="search" list="roomlist" placeholder="ค้นหาห้อง เช่น 316 หรือ ห้องพยาบาล" aria-label="ค้นหาห้อง" autocomplete="off"><datalist id="roomlist"></datalist></div>
     <div id="sceneHead"></div>
     <div id="detail"></div>
@@ -188,7 +214,7 @@ body.panelhide #panel{display:none}
     <div id="compass" aria-hidden="true"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="18" fill="var(--chip)" stroke="var(--line)"/><g id="needle"><path d="M20 5 L25 21 L20 18 L15 21 Z" fill="#c8431a"/><path d="M20 35 L25 19 L20 22 L15 19 Z" fill="var(--muted)"/></g><text x="20" y="13" text-anchor="middle" font-size="0" fill="#fff">N</text></svg><span>เหนือ</span></div>
     <div id="scalebar" aria-hidden="true"><i></i><span>50 ม.</span></div>
     <div id="hint">ลากเพื่อหมุน · ล้อเมาส์/บีบนิ้วเพื่อซูม · คลิกหมายเลขเพื่อดูรายละเอียด</div>
-    <div id="tabs" role="tablist" aria-label="ฉากแผนเผชิญเหตุ"></div>
+    <div id="tabs" role="tablist" aria-label="หัวข้อ"></div>
     <div id="err"><p>เปิดแบบจำลอง 3 มิติไม่ได้ในเบราว์เซอร์นี้ ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด</p></div>
   </main>
 </div>
@@ -1265,6 +1291,7 @@ var dpr=window.devicePixelRatio||1;
 var isMobile=Math.min(innerWidth,innerHeight)<700||/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent||"");
 try{
   renderer=new THREE.WebGLRenderer({antialias:!isMobile||dpr<2,alpha:true,powerPreference:"high-performance"});
+  renderer.domElement.setAttribute("role","img");renderer.domElement.setAttribute("aria-label","แบบจำลอง 3 มิติของโรงเรียน ใช้รายการอาคารและปุ่มด้านข้างเพื่อเลือกดูรายละเอียดด้วยแป้นพิมพ์หรือโปรแกรมอ่านหน้าจอ");
 }catch(e){$("err").style.display="grid";return;}
 renderer.setPixelRatio(Math.min(dpr,isMobile?1.5:2));
 renderer.shadowMap.enabled=true;
@@ -1593,8 +1620,8 @@ var gymBeacon=new THREE.Mesh(new THREE.CylinderGeometry(1,1,22,16,1,true),new TH
 gymBeacon.position.set(-72,11,-8.4);root.add(gymBeacon);
 
 /* ---------- routes ---------- */
-var routeGroups={evac:new THREE.Group(),fire:new THREE.Group()};
-root.add(routeGroups.evac);root.add(routeGroups.fire);
+var routeGroups={evac:new THREE.Group(),fire:new THREE.Group(),tour:new THREE.Group()};
+root.add(routeGroups.evac);root.add(routeGroups.fire);root.add(routeGroups.tour);
 var movers=[];
 var gCyl=new THREE.CylinderGeometry(.5,.5,1,6),gBall=new THREE.SphereGeometry(.5,8,8),gCone=new THREE.ConeGeometry(1.5,3.4,12);
 var UPV=new THREE.Vector3(0,1,0),bmCache={};
@@ -1714,11 +1741,12 @@ function drawRoutes(){
 var pinsEl=$("pins");
 var pinList=[];
 function addPin(id,kind,label,short,x,y,z,always){
-  var el=document.createElement("div");el.className="pin "+kind;el.setAttribute("data-id",id);
+  var el=document.createElement("div");el.className="pin "+kind;el.setAttribute("data-id",id);el.setAttribute("role","button");el.tabIndex=0;el.setAttribute("aria-label",short||label);
   el.innerHTML='<span class="b">'+label+'</span>'+(short?'<span class="n'+(always?' always':'')+'">'+short+'</span>':'');
   pinsEl.appendChild(el);
   var o={id:id,kind:kind,el:el,pos:new THREE.Vector3(x,y,z),show:true};pinList.push(o);
-  el.addEventListener("click",function(){select(id);});return o;
+  el.addEventListener("click",function(){select(id);});
+  el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();select(id);}});return o;
 }
 var B=function(id){return buildings[id];};
 function reg(id,x,z,top){buildings[id]={x:x,z:z,top:top||3};}
@@ -1740,7 +1768,7 @@ var info=[
  {id:"b12",n:"8",name:"ลานอเนกประสงค์ (ลานหน้าเสาธง)",short:"ลานเสาธง",desc:"ลานคอนกรีตกลางโรงเรียน มีเวทีและเสาธง"},
  {id:"assy",n:"9",name:"สนามฟุตบอล (จุดรวมพล)",short:"สนามฟุตบอล · จุดรวมพล",desc:"จุดรวมพลปัจจุบันของโรงเรียน",kind:"a"},
  {id:"b7",n:"10",name:"โรงยิม",short:"โรงยิม",desc:"โรงยิมพลศึกษา มีหลังคา พื้นที่รวมคนจำนวนมาก"},
- {id:"b8",n:"11",name:"สนามฟุตซอล (ลานกีฬาอเนกประสงค์ · จุดรวมพลสำรอง)",short:"สนามฟุตซอล · จุดรวมพลสำรอง",desc:"สนามฟุตซอลกลางแจ้งพื้นสีฟ้า ข้างสนามมีสนามบาสเกตบอลขนานกับโรงยิม กำหนดเป็นจุดรวมพลสำรองเมื่อสนามฟุตบอลใช้ไม่ได้ อยู่ติดถนนข้างหอประชุม",kind:"a"},
+ {id:"b8",n:"11",name:"สนามฟุตซอล (จุดรวมพลสำรอง)",short:"สนามฟุตซอล · จุดรวมพลสำรอง",desc:"สนามฟุตซอลกลางแจ้งพื้นสีฟ้า ข้างสนามมีสนามบาสเกตบอลขนานกับโรงยิม กำหนดเป็นจุดรวมพลสำรองเมื่อสนามฟุตบอลใช้ไม่ได้ อยู่ติดถนนข้างหอประชุม",kind:"a"},
  {id:"b6",n:"12",name:"อาคารหอประชุม",short:"หอประชุม",desc:"หอประชุมเฉลิมพระเกียรติ พื้นที่รวมคนจำนวนมาก"},
  {id:"booth",n:"13",name:"ป้อมยาม",short:"ป้อมยาม",desc:"อยู่ที่ประตูทางเข้า"},
  {id:"b14b",n:"14",name:"อาคารกิจการนักเรียน",short:"กิจการนักเรียน",desc:"ตำแหน่งโดยประมาณ ตามผังโรงเรียน (ไม่ใช่มาตราส่วน)"},
@@ -1790,14 +1818,99 @@ var shelter=[
 shelter.forEach(function(s){addPin(s.id,"a","↑",s.name,s.x,s.y,s.z,false);});
 addPin("cmd","a","บก.","ห้องพักผู้อำนวยการ 316 (ศูนย์สั่งการ เสนอ)",buildings.b1.x,15,buildings.b1.z+6,false);
 
+/* ---------- tour mode: visitor guide (draft copy, school to confirm) ---------- */
+var TT={
+ g1:"จุดเริ่มต้นการนำชม ป้อมยามอยู่ตรงประตู ผู้มาติดต่อสอบถามทางได้ที่นี่ ช่วงเช้าและเย็นเป็นจุดรับส่งนักเรียน รถจะหนาแน่น",
+ b6:"หอประชุมเฉลิมพระเกียรติ ใช้จัดประชุมและกิจกรรมที่มีคนจำนวนมาก",
+ b10:"อาคารสำหรับวิชาที่ต้องลงมือทำ มีห้องการงานอาชีพ (511) และห้องศิลปะ (512) อยู่ติดถนนทางเข้า",
+ b8:"สนามฟุตซอลพื้นสีฟ้า ข้างกันเป็นสนามบาสเกตบอลและโรงยิมพลศึกษาที่มีหลังคา ใช้เรียนพลศึกษาและแข่งกีฬา สนามฟุตซอลยังเป็นจุดรวมพลสำรองด้วย",
+ b4:"ห้องนาฏศิลป์ (411) ด้านหลังมีลานอเนกประสงค์มีหลังคาสำหรับซ้อมและทำกิจกรรมกลุ่ม",
+ b3:"อาคารชั้นเดียวยกพื้นสูง มีห้องดนตรีสากล (211) ห้องดนตรีไทย (212) และห้องพยาบาล (213) ที่ปลายอาคาร ขึ้นทางบันได",
+ b12:"ลานกลางโรงเรียน มีเวทีและเสาธง นักเรียนเข้าแถวทำกิจกรรมหน้าเสาธงทุกเช้า",
+ b13:"ฐานพระพุทธชินวัตร สถานที่สักการะของนักเรียนและบุคลากร ควรแสดงความเคารพเมื่อเดินผ่าน",
+ b2:"ชั้น 1 มีห้องประชาสัมพันธ์ (114) ผู้มาติดต่อสอบถามได้ที่นี่ รวมทั้งห้องพัสดุและห้องเรียนสีเขียว ชั้น 2 เป็นห้องภาษาไทยและภาษาอังกฤษ",
+ b1:"อาคาร 3 ชั้น ยาวที่สุดในโรงเรียน ชั้น 1 เป็นสำนักงาน ห้องผู้อำนวยการ (316) ห้องประชุมเฉลิมพระเกียรติ (317) และห้องสมุด (318) ชั้น 2 เป็นห้องคอมพิวเตอร์และวิทยาศาสตร์ ชั้น 3 เป็นสังคมศึกษา สุขศึกษา และคณิตศาสตร์ บนหลังคามีแผงโซลาร์เซลล์",
+ assy:"สนามหลักของโรงเรียน และเป็นจุดรวมพลเมื่อเกิดเหตุฉุกเฉิน ถ้าได้ยินสัญญาณเตือนภัยระหว่างเยี่ยมชม ให้เดินตามครูมาที่สนามนี้",
+ khok:"พื้นที่ที่เสนอทำแปลงเรียนรู้ตามแนวโคก หนอง นา บ่อน้ำรูปตัว U ล้อมโคกสวนกล้วย มีบ่อปลาพร้อมศาลา และแปลงนา (ยังเป็นแบบร่าง) อย่าเข้าใกล้ขอบบ่อ",
+ b11:"จุดสุดท้ายของการนำชม ชั้นล่างโล่งและมีหลังคา เหมาะเป็นที่พักหลังเดินชม"
+};
+/* stop: pin id, graph node to walk to (or a point), short title */
+var TOUR=[
+ {id:"g1",n:"FG",t:"ประตูทางเข้าและป้อมยาม"},
+ {id:"b6",n:"B6n",t:"หอประชุม"},
+ {id:"b10",n:"B10d",t:"อาคาร 5 การงานอาชีพและศิลปะ"},
+ {id:"b8",n:"G",t:"สนามฟุตซอล โรงยิม และสนามบาส"},
+ {id:"b4",n:"B4w",t:"อาคาร 4 นาฏศิลป์"},
+ {id:"b3",n:"E3m",t:"อาคาร 2 ดนตรีและห้องพยาบาล"},
+ {id:"b12",n:"Cm",t:"ลานเสาธง"},
+ {id:"b13",n:"B13d",t:"ฐานพระพุทธชินวัตร"},
+ {id:"b2",n:"B2d",t:"อาคาร 1 ประชาสัมพันธ์และห้องภาษา"},
+ {id:"b1",n:"E1b",t:"อาคาร 3 สำนักงานและห้องสมุด"},
+ {id:"assy",n:"F2",end:[FIELDC],t:"สนามฟุตบอล (จุดรวมพล)"},
+ {id:"khok",p:[31,126],t:"สวนโคก หนอง นา (แบบร่าง)"},
+ {id:"b11",p:[NODE.K[0],NODE.K[1]],via:[FIELDC,NODE.F5],t:"โรงอาหาร"}
+];
+function gpath(a,b){                           /* plain shortest path on the walkway graph (no evacuation rules) */
+  var dist={},prev={},done={};dist[a]=0;
+  for(;;){var u=null,best=Infinity;Object.keys(dist).forEach(function(k){if(!done[k]&&dist[k]<best){best=dist[k];u=k;}});
+    if(u===null)return null;if(u===b)break;done[u]=1;
+    (ADJ[u]||[]).forEach(function(e){var nd=dist[u]+e.d;if(dist[e.to]===undefined||nd<dist[e.to]){dist[e.to]=nd;prev[e.to]=u;}});}
+  var pts=[],n=b;while(n){pts.unshift(NODE[n]);n=prev[n];}return pts;
+}
+var tourPts=[],tourLen=0;
+(function(){
+  var lastNode=null,last=null;
+  TOUR.forEach(function(st){
+    var seg=[];
+    if(st.n){seg=lastNode?gpath(lastNode,st.n):[NODE[st.n]];lastNode=st.n;if(st.end)seg=seg.concat(st.end);}
+    else{seg=[last].concat(st.via||[]).concat([st.p]);lastNode=null;}
+    seg.forEach(function(p){if(!last||p[0]!==last[0]||p[1]!==last[1]){if(last)tourLen+=Math.hypot(p[0]-last[0],p[1]-last[1]);tourPts.push(p);last=p;}});
+  });
+  route(routeGroups.tour,tourPts,0xe0a422,1.1,.6);
+})();
+var tourIdx=-1,TOUR_WALK=1.0,TOUR_STOP=60;   /* visitors stroll ~1 m/s, ~1 min per stop */
+function tourMin(){return Math.round((tourLen/TOUR_WALK+TOUR.length*TOUR_STOP)/60);}
+var TOURSET={};TOUR.forEach(function(t){TOURSET[t.id]=1;});
+var DIRGROUPS=[
+ ["อาคารเรียน",["b2","b3","b1","b4","b10"]],
+ ["เรียนรู้ กีฬา และกิจกรรม",["lib","b13","b12","b6","b7","b8","assy","khok","farm"]],
+ ["บริการและสิ่งอำนวยความสะดวก",["booth","b11","b15_1","b14b","b9","park_s","bus","b14"]]
+];
+var SERVICES=[
+ {id:"b2",k:"1",t:"สอบถามข้อมูลทั่วไป",d:"ห้องประชาสัมพันธ์ 114 อาคาร 1 ชั้น 1"},
+ {id:"b1",k:"3",t:"ติดต่อผู้บริหารและงานสำนักงาน",d:"อาคาร 3 ชั้น 1: ห้องพักผู้อำนวยการ 316 · ห้องวิชาการ 312 · งบประมาณ 313 · บุคคล 314 · บริหารทั่วไป 315"},
+ {id:"lib",k:"6",t:"ห้องสมุด",d:"ห้อง 318 อาคาร 3 ชั้น 1"},
+ {id:"b3",k:"2",t:"ป่วยหรือบาดเจ็บ",d:"ห้องพยาบาล 213 อาคาร 2 ขึ้นทางบันได ถ้าเดินไม่ไหวให้แจ้งครูหรือห้องประชาสัมพันธ์"},
+ {id:"b15_1",k:"15",t:"ห้องน้ำ",d:"อาคารเล็กริมถนนทางเข้า และในอาคาร 1 กับอาคาร 3 ข้างบันได"},
+ {id:"b11",k:"23",t:"อาหารและเครื่องดื่ม",d:"โรงอาหาร ติดสนามฟุตบอล"},
+ {id:"g1",k:"ป",cls:"g",t:"รับส่งนักเรียน",d:"ประตูทางเข้า มีป้อมยาม ช่วงเช้าและเย็นรถหนาแน่น"},
+ {id:"b14",k:"20",t:"จอดรถผู้มาติดต่อ",d:"สอบถามที่ป้อมยามก่อนนำรถเข้า (ที่จอดรถครูอยู่ข้างอาคาร 3)"}
+];
+
 /* ---------- scenes ---------- */
 var scenes=[
- {id:"overview",tab:"ภาพรวม",title:"ภาพรวมพื้นที่โรงเรียน",
+ {id:"welcome",mode:"tour",tab:"ยินดีต้อนรับ",title:"ยินดีต้อนรับสู่โรงเรียน",
+  text:"แตะหมายเลขบนแผนที่หรือรายการด้านล่างเพื่อดูว่าแต่ละที่คืออะไร อยากเดินชมตามลำดับให้เลือก “เส้นทางนำชม” อยากหาห้องให้พิมพ์เลขห้องในช่องค้นหา",
+  cam:{p:[30,200,250],t:[-40,0,-5]},
+  show:function(p){return (p.kind==="b"&&p.id!=="hse_c"&&p.id!=="hse_t")||p.id==="assy"||p.id==="b8"||p.id==="g1";},
+  groups:DIRGROUPS},
+ {id:"tour",mode:"tour",tab:"เส้นทางนำชม",title:"เส้นทางนำชมโรงเรียน",
+  text:"",
+  cam:{p:[30,210,240],t:[-20,0,30]},
+  show:function(p){return !!TOURSET[p.id];},
+  tour:true},
+ {id:"service",mode:"tour",tab:"ติดต่อและบริการ",title:"มาติดต่อเรื่องอะไร",
+  text:"เลือกเรื่องที่ต้องการ แผนที่จะพาไปยังอาคารนั้น",
+  cam:{p:[-40,190,210],t:[-30,0,-10]},
+  show:function(p){return SERVICES.some(function(x){return x.id===p.id;});},
+  items:function(){return SERVICES.map(function(x){return {id:x.id,k:x.k,cls:x.cls||"",t:x.t,d:x.d};});},
+  note:"ถ้าได้ยินสัญญาณเตือนภัย ให้เดินตามครูไปที่สนามฟุตบอล (จุดรวมพล) ดูรายละเอียดได้ที่ “แผนเผชิญเหตุ”"},
+ {id:"overview",mode:"emg",tab:"ภาพรวม",title:"ภาพรวมพื้นที่โรงเรียน",
   text:"แบบจำลองตั้งตามผังโรงเรียน ทิศเหนืออยู่ด้านบนของภาพ ใช้หมายเลข 1–23 ตามผังที่โรงเรียนใช้อยู่ คลิกหมายเลขหรือรายการเพื่อซูมดู เลือกอาคารเรียนแล้วกด “ดูภายในอาคาร” เพื่อแยกชั้นดูทุกห้องและเส้นทางอพยพจากห้อง หรือพิมพ์เลขห้องในช่องค้นหา",
   cam:{p:[30,200,250],t:[-40,0,-5]},
   show:function(p){return p.kind==="b"||p.id==="assy"||p.id==="b8";},
   items:function(){return info.map(function(i){return {id:i.id,k:i.n,cls:i.kind==="a"?"g":"",t:i.name,d:i.desc};});}},
- {id:"exits",tab:"ทางเข้า–ออกและจุดรวมพล",title:"ทางเข้า–ออกและจุดรวมพล",
+ {id:"exits",mode:"emg",tab:"ทางเข้า–ออกและจุดรวมพล",title:"ทางเข้า–ออกและจุดรวมพล",
   text:"จุดรวมพลปัจจุบันคือสนามฟุตบอล (9) จุดรวมพลสำรองคือสนามฟุตซอล (11) ประตูใช้งานได้สองประตู ประตูทางเข้าอยู่ทางตะวันออกเฉียงเหนือ ประตูหลังอยู่ทางตะวันตกเฉียงใต้ เส้นทางอพยพเดินตามถนนหลักและตัดผ่านลานเสาธงได้ ลองติ๊กจำลองว่าสนามหรือประตูใช้ไม่ได้ได้ในกล่องด้านล่าง",
   ctl:true,
   cam:{p:[-70,170,200],t:[-60,0,-5]},
@@ -1805,14 +1918,14 @@ var scenes=[
   routes:["evac"],
   items:function(){return [
    {id:"assy",k:"9",cls:"g",t:"สนามฟุตบอล (จุดรวมพล)",d:"ทุกกลุ่มอาคารมีเส้นทางเดินไปสนามโดยไม่ตัดผ่านถนนทางเข้าหลัก"},
-   {id:"b8",k:"11",cls:"g",t:"ลานกีฬาอเนกประสงค์ (จุดรวมพลสำรอง)",d:"ใช้เมื่อสนามฟุตบอลใช้ไม่ได้ เช่น น้ำท่วมขัง หรือเส้นทางไปสนามไม่ปลอดภัย เป็นลานโล่งกลางแจ้ง ห่างจากอาคาร"},
+   {id:"b8",k:"11",cls:"g",t:"สนามฟุตซอล (จุดรวมพลสำรอง)",d:"ใช้เมื่อสนามฟุตบอลใช้ไม่ได้ เช่น น้ำท่วมขัง หรือเส้นทางไปสนามไม่ปลอดภัย เป็นลานโล่งกลางแจ้ง ห่างจากอาคาร"},
    {id:"g1",k:"ป",cls:"g",t:gatesInfo[0].name,d:gatesInfo[0].desc},
    {id:"g2",k:"ห",cls:"g",t:gatesInfo[1].name,d:gatesInfo[1].desc},
    {id:"booth",k:"13",cls:"",t:"ป้อมยาม",d:"จุดควบคุมการเข้าออกที่ประตูทางเข้า"},
    {id:"b12",k:"8",cls:"",t:"ลานเสาธง",d:"นักเรียนอาคาร 1 และ 2 ออกผ่านลานแล้วเดินไปสนาม (เส้นทางเสนอ)"}];},
   legend:[["#20c9cc","ไปสนามฟุตบอล"],["#9b6cf0","ไปสนามฟุตซอล (สำรอง)"],["#e0509a","ออกนอกโรงเรียน"]],
   note:"ถนนเข้าโรงเรียนมีเส้นเดียว ช่วงเลิกเรียนรถผู้ปกครองกับรถฉุกเฉินใช้ร่วมกัน ควรกำหนดครูเวรหน้าประตูให้เปิดช่องทางให้รถฉุกเฉินก่อน ประตูหลังเป็นทางออกสำรองเมื่อประตูหน้าใช้ไม่ได้"},
- {id:"fire",tab:"อัคคีภัย",title:"อัคคีภัยและไฟฟ้า",
+ {id:"fire",mode:"emg",tab:"อัคคีภัย",title:"อัคคีภัยและไฟฟ้า",
   text:"หน่วยดับเพลิงที่ระบุในแผนอยู่ไกล ศูนย์ป้องกันภัยฝ่ายพลเรือน เทศบาลตำบลลานกระบือ 20.2 กม. ใช้เวลาประมาณ 24 นาที ชุดดับเพลิงของโรงเรียนต้องควบคุมเหตุเบื้องต้นเอง",
   cam:{p:[90,160,150],t:[-30,0,-10]},
   show:function(p){return p.id==="h_solar"||p.id==="h_cook"||p.id==="h_line"||p.id==="h_stair"||p.id==="h_nurse"||p.id==="assy"||p.id==="g1";},
@@ -1820,7 +1933,7 @@ var scenes=[
   items:function(){return hazards.filter(function(h){return h.id!=="h_paddy";}).map(function(h){return {id:h.id,k:"!",cls:"h",t:h.name,d:h.desc};}).concat([{id:"assy",k:"9",cls:"g",t:"สนามฟุตบอล (จุดรวมพล)",d:"อยู่ห่างจากอาคารเรียนทุกหลัง"}]);},
   legend:[["#ff8a1f","ทางเข้ารถดับเพลิง (เสนอ)"],["#20c9cc","เส้นทางอพยพ (เสนอ)"]],
   note:"จุดเสี่ยงที่ทำเครื่องหมายมาจากภาพมุมสูง ผังห้อง และข้อสังเกตทั่วไป ควรให้ครูผู้รับผิดชอบสำรวจหน้างานแล้วปรับรายการ"},
- {id:"flood",tab:"อุทกภัย",title:"อุทกภัยและน้ำท่วมขัง",
+ {id:"flood",mode:"emg",tab:"อุทกภัย",title:"อุทกภัยและน้ำท่วมขัง",
   text:"โรงเรียนมีนาข้าวติดรั้วด้านตะวันออกและด้านใต้ของผัง ภาพมุมสูงพบน้ำขังในแปลงนา พื้นที่สีน้ำเงินแสดงทิศที่น้ำอาจเอ่อเข้ามา (เป็นการแสดงแนวคิด ไม่ใช่ผลสำรวจระดับน้ำ)",
   cam:{p:[190,130,170],t:[20,0,0]},
   show:function(p){return p.id==="h_paddy"||p.id==="s_b1"||p.id==="s_b2"||p.id==="assy";},
@@ -1831,9 +1944,9 @@ var scenes=[
    {id:"s_b1",k:"↑",cls:"g",t:"ชั้น 2–3 อาคาร 3",d:"พื้นที่หลบน้ำแนวตั้งสำหรับนักเรียนจำนวนมาก (เสนอ)"},
    {id:"s_b2",k:"↑",cls:"g",t:"ชั้น 2 อาคาร 1",d:"พื้นที่หลบน้ำสำรอง (เสนอ)"},
    {id:"assy",k:"9",cls:"g",t:"สนามฟุตบอล",d:"ต้องสำรวจว่าเป็นพื้นที่ต่ำหรือไม่ และใช้สนามฟุตซอล (11) เป็นจุดรวมพลสำรอง ถ้าน้ำท่วมทั้งสองจุดให้ขึ้นชั้นบนของอาคาร 3 และอาคาร 1"},
-   {id:"b8",k:"11",cls:"g",t:"ลานกีฬาอเนกประสงค์ (จุดรวมพลสำรอง)",d:"ลานโล่งกลางแจ้ง ต้องตรวจว่ามีน้ำขังหรือไม่ก่อนใช้"}];},
+   {id:"b8",k:"11",cls:"g",t:"สนามฟุตซอล (จุดรวมพลสำรอง)",d:"ลานโล่งกลางแจ้ง ต้องตรวจว่ามีน้ำขังหรือไม่ก่อนใช้"}];},
   note:"รพ.สต.บ้านประชาสุขสันต์ อยู่ห่าง 550 ม. (2 นาที) ใช้เป็นจุดรับการรักษาเบื้องต้น เส้นทางไปโรงพยาบาลลานกระบือ 20.5 กม. อาจถูกตัดเมื่อน้ำท่วมถนน โรงพยาบาลไทรงาม 19.4 กม. เป็นเส้นทางสำรอง"},
- {id:"safety",tab:"ภัยจากบุคคล",title:"เหตุรุนแรงและบุคคลภายนอก",
+ {id:"safety",mode:"emg",tab:"ภัยจากบุคคล",title:"เหตุรุนแรงและบุคคลภายนอก",
   text:"ควบคุมการเข้าออกที่ประตูสองบาน และกำหนดศูนย์สั่งการแห่งเดียว ส่วนการอพยพหรือหลบซ่อนให้เลือกทิศทางที่ห่างจากต้นเหตุ",
   cam:{p:[0,140,150],t:[-30,0,-20]},
   show:function(p){return p.kind==="g"||p.id==="cmd"||p.id==="assy"||p.id==="b6"||p.id==="b8"||p.id==="booth";},
@@ -1845,7 +1958,7 @@ var scenes=[
    {id:"cmd",k:"บก.",cls:"g",t:"ศูนย์สั่งการ (เสนอ)",d:"ห้องพักผู้อำนวยการ 316 ชั้น 1 อาคาร 3 ติดต่อ สภ.ลานกระบือ และสั่งการครู"},
    {id:"b6",k:"12",cls:"",t:"หอประชุมและโรงยิม",d:"ที่รวมคนจำนวนมาก ต้องกำหนดคนประจำประตูทุกบาน"}];},
   note:"สถานีตำรวจภูธรลานกระบืออยู่ห่าง 20.5 กม. ประมาณ 25 นาที ครูเวรต้องควบคุมสถานการณ์เบื้องต้นและแจ้งเหตุทันที ตำแหน่งจุดสั่งการเป็นข้อเสนอ"},
- {id:"agencies",tab:"หน่วยงานช่วยเหลือ",title:"หน่วยงานช่วยเหลือและระยะทาง",
+ {id:"agencies",mode:"emg",tab:"หน่วยงานช่วยเหลือ",title:"หน่วยงานช่วยเหลือและระยะทาง",
   text:"วัดโดย Google Maps เส้นทางรถยนต์จากโรงเรียน เวลาอาจเปลี่ยนตามการจราจร",
   cam:{p:[30,200,250],t:[-40,0,-5]},
   show:function(p){return false;},
@@ -1856,33 +1969,60 @@ var scenes=[
 /* ---------- UI ---------- */
 var layers={roads:true,trees:true,village:true,flood:false,routes:true};
 var cur=null,selected=null,tabsEl=$("tabs"),headEl=$("sceneHead"),bodyEl=$("sceneBody");
-scenes.forEach(function(s){
-  var b=document.createElement("button");b.type="button";b.textContent=s.tab;b.setAttribute("role","tab");b.id="t_"+s.id;
-  b.addEventListener("click",function(){setScene(s.id,true);});tabsEl.appendChild(b);
+var mode=null;
+function buildTabs(m){
+  if(mode===m)return;mode=m;tabsEl.innerHTML="";
+  scenes.filter(function(s){return s.mode===m;}).forEach(function(s){
+    var b=document.createElement("button");b.type="button";b.textContent=s.tab;b.setAttribute("role","tab");b.id="t_"+s.id;
+    b.setAttribute("aria-controls","sceneBody");b.addEventListener("click",function(){setScene(s.id,true);});tabsEl.appendChild(b);
+  });
+  tabsEl.setAttribute("aria-label",m==="tour"?"หัวข้อนำชม":"หัวข้อแผนเผชิญเหตุ");
+  document.body.classList.toggle("m-tour",m==="tour");document.body.classList.toggle("m-emg",m!=="tour");
+  $("modeLbl").textContent=m==="tour"?"นำชมโรงเรียน":"แผนเผชิญเหตุ";
+  Array.prototype.forEach.call(document.querySelectorAll("#mode button"),function(b){b.setAttribute("aria-pressed",b.getAttribute("data-m")===m?"true":"false");});
+}
+Array.prototype.forEach.call(document.querySelectorAll("#mode button"),function(b){b.addEventListener("click",function(){
+  var m=b.getAttribute("data-m");if(m===mode)return;setScene(m==="tour"?"welcome":"overview",true);announce(m==="tour"?"โหมดนำชมโรงเรียน":"โหมดแผนเผชิญเหตุ");});});
+tabsEl.addEventListener("keydown",function(e){
+  var bs=Array.prototype.slice.call(tabsEl.children),i=bs.indexOf(document.activeElement);if(i<0)return;
+  var n=e.key==="ArrowRight"?(i+1)%bs.length:e.key==="ArrowLeft"?(i-1+bs.length)%bs.length:e.key==="Home"?0:e.key==="End"?bs.length-1:-1;
+  if(n<0)return;e.preventDefault();bs[n].focus();bs[n].click();
 });
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 var tween=null;
+var reduceMotion=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+function announce(t){var e=$("sr");if(e)e.textContent=t;}
 function flyTo(pos,tgt,ms){
+  if(reduceMotion)ms=1;
   tween={t0:performance.now(),ms:ms||900,p0:camera.position.clone(),t0v:controls.target.clone(),p1:new THREE.Vector3(pos[0],pos[1],pos[2]),t1:new THREE.Vector3(tgt[0],tgt[1],tgt[2])};
 }
 function setScene(id,push){
-  var s=scenes.filter(function(x){return x.id===id;})[0]||scenes[0];closeInside();cur=s;selected=null;
+  var s=scenes.filter(function(x){return x.id===id;})[0]||scenes[0];closeInside();buildTabs(s.mode);cur=s;selected=null;tourIdx=-1;
   if(push){try{history.replaceState(null,"","#"+s.id);}catch(e){}}
-  Array.prototype.forEach.call(tabsEl.children,function(b){b.setAttribute("aria-selected",b.id==="t_"+s.id?"true":"false");});
-  var h='<p class="eyebrow">ฉากที่ '+(scenes.indexOf(s)+1)+' จาก '+scenes.length+'</p><h2>'+esc(s.title)+'</h2><p>'+esc(s.text)+'</p>';
+  Array.prototype.forEach.call(tabsEl.children,function(b){var on=b.id==="t_"+s.id;b.setAttribute("aria-selected",on?"true":"false");b.tabIndex=on?0:-1;});
+  bodyEl.setAttribute("role","tabpanel");bodyEl.setAttribute("aria-labelledby","t_"+s.id);announce("ฉาก "+s.tab);
+  var ms=scenes.filter(function(x){return x.mode===s.mode;});
+  var txt=s.tour?("เดินชม "+TOUR.length+" จุด ระยะประมาณ "+(Math.round(tourLen/50)*50).toLocaleString("th-TH")+" ม. ใช้เวลาราว "+tourMin()+" นาที รวมแวะชมจุดละประมาณ 1 นาที กด “เริ่มนำชม” แล้วกด “ถัดไป” ทีละจุด เส้นสีทองบนแผนที่คือทางเดิน"):s.text;
+  var h='<p class="eyebrow">หัวข้อ '+(ms.indexOf(s)+1)+' จาก '+ms.length+'</p><h2>'+esc(s.title)+'</h2><p>'+esc(txt)+'</p>';
   headEl.innerHTML=h;$("detail").innerHTML="";
   var b="";
   if(s.ctl)b+=ctlHTML();
+  if(s.tour){b+='<div class="tourctl"><button type="button" class="ghost" id="tPrev" disabled>ก่อนหน้า</button><span class="pos" id="tPos" aria-live="polite">'+TOUR.length+' จุด</span><button type="button" class="primary" id="tNext">เริ่มนำชม</button></div>'
+    +'<ol class="list">'+TOUR.map(function(t,i){return '<li><button type="button" data-id="'+t.id+'" data-stop="'+i+'"><span class="k">'+(i+1)+'</span><span><span class="t">'+esc(t.t)+'</span><br><span class="d">'+esc(TT[t.id]||"")+'</span></span></button></li>';}).join("")+'</ol>';}
+  if(s.groups){b+='<ul class="list">'+s.groups.map(function(g){return '<li class="hd" role="presentation">'+esc(g[0])+'</li>'+g[1].map(function(id){var i=info.filter(function(x){return x.id===id;})[0];if(!i)return "";
+    return '<li><button type="button" data-id="'+i.id+'"><span class="k '+(i.kind==="a"?"g":"")+'">'+esc(i.n)+'</span><span><span class="t">'+esc(i.name)+'</span><br><span class="d">'+esc(TT[i.id]||i.desc)+'</span></span></button></li>';}).join("");}).join("")+'</ul>';}
   if(s.items){b+='<ul class="list">'+s.items().map(function(i){return '<li><button type="button" data-id="'+i.id+'"><span class="k '+i.cls+'">'+esc(i.k)+'</span><span><span class="t">'+esc(i.t)+'</span><br><span class="d">'+esc(i.d)+'</span></span></button></li>';}).join("")+'</ul>';}
   if(s.table){b+='<table class="tbl"><thead><tr><th>หน่วยงาน</th><th style="text-align:right">ระยะ</th><th style="text-align:right">นาที</th></tr></thead><tbody>'+s.table.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td class="n">'+esc(r[1])+'</td><td class="n">'+esc(r[2])+'</td></tr>';}).join("")+'</tbody></table>';}
   if(s.legend){b+='<div class="legend">'+s.legend.map(function(l){return '<span><i style="background:'+l[0]+'"></i>'+esc(l[1])+'</span>';}).join("")+'</div>';}
   if(s.note)b+='<p class="callout">'+esc(s.note)+'</p>';
   bodyEl.innerHTML=b;
   if(s.ctl){bindCtl();bindSim();}
-  Array.prototype.forEach.call(bodyEl.querySelectorAll("button[data-id]"),function(btn){btn.addEventListener("click",function(){select(btn.getAttribute("data-id"));});});
+  Array.prototype.forEach.call(bodyEl.querySelectorAll("button[data-id]"),function(btn){btn.addEventListener("click",function(){
+    if(btn.hasAttribute("data-stop")){tourGo(+btn.getAttribute("data-stop"));return;}select(btn.getAttribute("data-id"));});});
+  if(s.tour){$("tPrev").addEventListener("click",function(){tourGo(tourIdx-1);});$("tNext").addEventListener("click",function(){tourGo(tourIdx+1>=TOUR.length?0:tourIdx+1);});}
   pinList.forEach(function(p){p.show=s.show(p);p.el.style.display=p.show?"flex":"none";p.el.classList.remove("sel","dim");});
   layers.flood=!!s.flood;syncLayerUI();
-  beacon.visible=ring.visible=gymBeacon.visible=(s.id!=="agencies");
+  beacon.visible=ring.visible=gymBeacon.visible=(s.mode==="emg"&&s.id!=="agencies");
   applyLayers();applyClosed();
   flyTo(s.cam.p,s.cam.t,1000);
   $("panel").scrollTop=0;
@@ -1893,10 +2033,10 @@ function applyLayers(){
   var rb=$("bRoutes");if(rb)rb.setAttribute("aria-pressed",layers.routes?"true":"false");
   floodN.visible=floodE.visible=layers.flood;floodN.material.opacity=.5;
   var rt=(cur&&cur.routes)||[];
-  routeGroups.evac.visible=evacVis();routeGroups.fire.visible=layers.routes&&rt.indexOf("fire")>-1;
+  routeGroups.evac.visible=evacVis();routeGroups.tour.visible=!!(cur&&cur.tour);routeGroups.fire.visible=layers.routes&&rt.indexOf("fire")>-1;
   renderer.shadowMap.needsUpdate=true;dirty=true;
 }
-function evacVis(){var rt=(cur&&cur.routes)||[];return layers.routes&&(rt.indexOf("evac")>-1||!!selRoom||!!(selected&&STARTS[selected]));}
+function evacVis(){if(cur&&cur.mode==="tour")return false;var rt=(cur&&cur.routes)||[];return layers.routes&&(rt.indexOf("evac")>-1||!!selRoom||!!(selected&&STARTS[selected]));}
 $("bRoutes").addEventListener("click",function(){layers.routes=!layers.routes;syncLayerUI();applyLayers();});
 function syncLayerUI(){Array.prototype.forEach.call(document.querySelectorAll("#layerMenu input[data-l]"),function(i){i.checked=!!layers[i.getAttribute("data-l")];});}
 (function(){
@@ -1963,9 +2103,28 @@ function evacCard(id){
    +row("field","สนามฟุตบอล")+row("gym","สนามฟุตซอล (สำรอง)")+row("gate","ออกนอกโรงเรียน")+'</tbody></table>'
    +'<p><b>แนะนำ:</b> '+esc(recTxt)+'</p><p style="color:var(--muted);font-size:12px">เวลาคิดจากความเร็วเดินของฝูงนักเรียน 1.2 ม./วินาที บวกเวลาลงบันได 20 วินาทีต่อชั้น ระยะวัดจากแบบจำลอง (ประมาณ) ต้องจับเวลาจริงตอนซ้อมแผน</p></div>';
 }
+function tourGo(i){
+  if(i<0||i>=TOUR.length)return;tourIdx=i;select(TOUR[i].id);
+  var pv=$("tPrev"),nx=$("tNext"),ps=$("tPos");
+  if(pv)pv.disabled=i===0;
+  if(nx)nx.textContent=i===TOUR.length-1?"เริ่มใหม่":"ถัดไป";
+  if(ps)ps.textContent="จุดที่ "+(i+1)+" จาก "+TOUR.length;
+}
 function pinById(id){return pinList.filter(function(p){return p.id===id;})[0];}
 function showRooms(id){
   var el=$("detail"),inf=info.filter(function(i){return i.id===id;})[0],h="";
+  if(cur&&cur.mode==="tour"){
+    var gi=gatesInfo.filter(function(g){return g.id===id;})[0],nm=inf?inf.n+" "+inf.name:(gi?gi.name:id);
+    h='<div class="rooms"><h3>'+esc(nm)+'</h3><p>'+esc(TT[id]||(inf?inf.desc:gi?gi.desc:""))+'</p>';
+    if(inf&&inf.rooms&&rooms[inf.rooms])h+=rooms[inf.rooms].filter(function(r){return r[0]!=="ข้อสังเกต";}).map(function(r){return '<p><b>'+esc(r[0])+'</b> '+esc(r[1])+'</p>';}).join("");
+    h+='</div>';
+    if(BLD[id])h+='<div class="btnrow" style="margin:0 0 4px"><button type="button" class="primary" id="bIn">ดูภายในอาคาร (แยกชั้น เห็นทุกห้อง)</button></div>';
+    h+='<p class="safe-note">ได้ยินสัญญาณเตือนภัย: เดินตามครูไปสนามฟุตบอล (จุดรวมพล) · <button type="button" id="bToEmg">ดูแผนเผชิญเหตุ</button></p>';
+    el.innerHTML=h;
+    var bi2=$("bIn");if(bi2)bi2.addEventListener("click",function(){openInside(id);});
+    $("bToEmg").addEventListener("click",function(){setScene("exits",true);});
+    return;
+  }
   if(inf){
     if(inf.rooms&&rooms[inf.rooms])h='<div class="rooms"><h3>'+esc(inf.n+" "+inf.name)+'</h3>'+rooms[inf.rooms].map(function(r){return '<p><b>'+esc(r[0])+'</b> '+esc(r[1])+'</p>';}).join("")+'</div>';
     else h='<div class="rooms"><h3>'+esc(inf.n+" "+inf.name)+'</h3><p>'+esc(inf.desc)+'</p></div>';
@@ -1977,7 +2136,7 @@ function showRooms(id){
 function select(id){
   if(document.body.classList.contains("panelhide")&&id)setPanel(true);
   if(/^[rf]:/.test(id))return;
-  var p=pinById(id);if(!p)return;if(inside&&inside!==id)closeInside();if(inside===id){renderInsidePanel();return;}selRoom=null;selected=id;showRooms(id);drawRoutes();
+  var p=pinById(id);if(!p)return;announce("เลือก "+(p.el.getAttribute("aria-label")||""));if(inside&&inside!==id)closeInside();if(inside===id){renderInsidePanel();return;}selRoom=null;selected=id;showRooms(id);drawRoutes();
   pinList.forEach(function(q){q.el.classList.toggle("sel",q.id===id);});
   Array.prototype.forEach.call(bodyEl.querySelectorAll("button[data-id]"),function(btn){btn.setAttribute("aria-current",btn.getAttribute("data-id")===id?"true":"false");});
   var t=root.localToWorld(p.pos.clone()),dist=75;
