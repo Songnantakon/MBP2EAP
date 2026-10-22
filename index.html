@@ -1,5 +1,10 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f4e3d">
 <title>แผนที่เผชิญเหตุ พภ.2</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
@@ -128,6 +133,8 @@ body.nonames .pin.sel .n{display:block}
 #scalebar{position:absolute;left:14px;bottom:calc(92px + env(safe-area-inset-bottom,0px));font-size:11.5px;font-weight:600;color:var(--ink);background:var(--chip);padding:3px 8px 4px;border-radius:5px;pointer-events:none}
 #scalebar i{display:block;height:6px;border:2px solid var(--ink);border-top:0;margin-bottom:2px;width:60px}
 #err{position:absolute;inset:0;display:none;place-items:center;padding:24px;text-align:center;color:var(--ink)}
+body.panelhide #app{grid-template-columns:1fr!important;grid-template-rows:minmax(0,1fr)!important}
+body.panelhide #panel{display:none}
 @media (max-width:820px){
   body{overflow:hidden}
   #app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,44%)}
@@ -149,7 +156,7 @@ body.nonames .pin.sel .n{display:block}
 
 <div id="app">
   <aside id="panel" aria-live="polite">
-    <p class="eyebrow">แผนเผชิญเหตุ · แบบจำลอง 3 มิติ · <span id="ver">เวอร์ชัน 18 (21 ต.ค. 69)</span></p>
+    <p class="eyebrow">แผนเผชิญเหตุ · แบบจำลอง 3 มิติ · <span id="ver">เวอร์ชัน 21 (22 ต.ค. 69)</span></p>
     <h1 class="school">โรงเรียนมัธยมพัชรกิติยาภา 2 กำแพงเพชร</h1>
     <p class="sub">ต.ประชาสุขสันต์ อ.ลานกระบือ จ.กำแพงเพชร</p>
     <div class="search"><input id="q" type="search" list="roomlist" placeholder="ค้นหาห้อง เช่น 316 หรือ ห้องพยาบาล" aria-label="ค้นหาห้อง" autocomplete="off"><datalist id="roomlist"></datalist></div>
@@ -163,6 +170,7 @@ body.nonames .pin.sel .n{display:block}
     <div id="gl"></div>
     <div id="pins"></div>
     <div id="tools">
+      <button id="bPanel" type="button" aria-pressed="false" title="ซ่อนหรือแสดงแผงข้อมูล ให้เห็นแบบจำลองเต็มจอ">เต็มจอ</button>
       <button id="bWide" type="button">มุมกว้าง</button>
       <button id="bSpin" type="button" aria-pressed="false">หมุนอัตโนมัติ</button>
       <button id="bNames" type="button" aria-pressed="true">ชื่ออาคาร</button>
@@ -1447,7 +1455,7 @@ function courtTex(w,d,ppm,draw){var c=document.createElement("canvas");c.width=M
     var ringM=new THREE.Mesh(new THREE.TorusGeometry(.23,.025,6,16),mat(0xe0592a));ringM.rotation.x=Math.PI/2;ringM.position.set(-sd*1.35,3.05,0);hg.add(ringM);
     hg.position.set(hx,0,11);hg.traverse(function(o){o.castShadow=true;});root.add(hg);});
 })();
-reg("bball",-62,11,1);
+reg("bball",-62,11,1);reg("khok",31,149,3);
 (function(){var m=new THREE.Mesh(new THREE.BoxGeometry(8,.8,5),mat(0xd7b56f));m.position.set(14,.4,-19);m.castShadow=true;root.add(m);
   for(var i=0;i<3;i++){var pole=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,10,8),mat(0xdddddd));pole.position.set(8+i*6,5,-22);pole.castShadow=true;root.add(pole);}
 })();
@@ -1462,6 +1470,7 @@ function inObs(x,z){for(var i=0;i<obstacles.length;i++){var o=obstacles[i];if(x>
   if(x>-28&&x<60&&z>56&&z<118)return true;                 /* football field */
   if(x>46.5&&x<53.5&&z>-58&&z<40)return true;              /* road between อาคาร 1 and อาคาร 3 */
   if(x>3&&x<25&&z>-24&&z<34)return true;                   /* courtyard */
+  if(x>5&&x<61&&z>122&&z<173)return true;                  /* โคก หนอง นา garden */
   if(x>-94&&x<-46&&z>-23&&z<23)return true;                /* courts */
   if(x>99&&x<130&&z>-72&&z<150)return true;if(x>60&&x<110&&z>-75&&z<-60)return true;return false;}
 var treesGrp=new THREE.Group(),villageGrp=new THREE.Group();root.add(treesGrp);root.add(villageGrp);
@@ -1482,6 +1491,40 @@ scatter(-37,118,78,152,24,1,1.5);scatter(58,56,80,118,10,1,1.4);scatter(-37,56,-
 scatter(-40,-18,-30,16,5,.9,1.2);
 scatter(58,-48,110,-30,14,1,1.5);
 scatter(-70,-36,-40,-32,6,.8,1.1);
+/* โคก หนอง นา demonstration garden (proposed) behind the football field:
+   U-shaped pond (หนอง) wrapped round a raised banana mound (โคก), open toward the field; fish pond with a sala; rice plots (นา) */
+(function(){
+  var g=new THREE.Group();root.add(g);
+  function flat(x,z,w,d,y,c){var p=new THREE.Mesh(new THREE.PlaneGeometry(w,d),mat(c));p.rotation.x=-Math.PI/2;p.position.set(x,y,z);p.receiveShadow=true;g.add(p);return p;}
+  function box(x,z,w,d,h,y,c,cast){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y+h/2,z);m.receiveShadow=true;m.castShadow=!!cast;g.add(m);return m;}
+  var EARTH=0xb59a6a,WATER=0x3f86b8,FISHW=0x2f7aa8;
+  flat(33,147.5,54,49,.03,0x9fbf72);                                   /* garden ground */
+  /* U pond (หนอง) round the mound; the open side faces the field */
+  flat(31,151,35,30,.05,EARTH);
+  flat(17.25,150.5,4.5,26,.07,WATER);flat(44.75,150.5,4.5,26,.07,WATER);flat(31,139.75,32,4.5,.071,WATER);
+  /* mound (โคก) with banana garden */
+  box(31,152.5,20,17,1,0,0x8a6e45);flat(31,152.5,19.2,16.2,1.02,0x7da653);
+  var stemG=new THREE.CylinderGeometry(.16,.24,2.4,6),leafG=new THREE.BoxGeometry(2.3,.05,.65),stemM=mat(0x8f9a58),leafM=mat(0x5fae3c),leafM2=mat(0x4e9a33);
+  for(var i=0;i<6;i++)for(var j=0;j<5;j++){
+    var x=23.2+i*3.1+(j%2)*.8,z=146.1+j*3.2,b=new THREE.Group();
+    var st=new THREE.Mesh(stemG,stemM);st.position.y=1.2;b.add(st);
+    for(var k=0;k<6;k++){var lf=new THREE.Mesh(leafG,k%2?leafM:leafM2),a=k/6*Math.PI*2+rand();
+      lf.position.set(Math.cos(a)*1.0,2.35,Math.sin(a)*1.0);lf.rotation.y=-a;lf.rotation.z=-.45;lf.castShadow=true;b.add(lf);}
+    b.position.set(x,1,z);b.scale.setScalar(.85+rand()*.3);g.add(b);
+  }
+  /* fish pond with a small wooden deck and sala */
+  flat(11,149,9,15,.06,EARTH);flat(11,149,7.2,13.2,.075,FISHW);
+  for(var f=0;f<6;f++){var fi=new THREE.Mesh(new THREE.BoxGeometry(.5,.05,.22),mat(0xf08a2c));fi.position.set(8.5+rand()*5,.1,144+rand()*10);fi.rotation.y=rand()*3;g.add(fi);}
+  box(11,141.1,4,2.2,.3,.2,0x9b7a52);
+  [[-1.8,-1.8],[1.8,-1.8],[-1.8,1.8],[1.8,1.8]].forEach(function(o){box(11+o[0],135+o[1],.25,.25,2.6,0,0x7a5a3a,true);});
+  box(11,135,4.4,4.4,.25,.4,0xb08a5a);
+  var roof=new THREE.Mesh(new THREE.ConeGeometry(3.6,1.8,4),mat(0x9b6b3a));roof.position.set(11,3.5,135);roof.rotation.y=Math.PI/4;roof.castShadow=true;g.add(roof);
+  /* rice plots (นา) with bunds */
+  flat(53.5,147.5,7,42,.05,EARTH);
+  for(var r=0;r<4;r++)flat(53.5,129.5+r*10.2,5.6,9.2,.07,r%2?0x9fd46a:0x86c454);
+  /* footpath from the field side up onto the mound */
+  flat(31,134,2.4,20,.08,0xe6dcc0);
+})();
 /* village (north-west) */
 (function(){
   var roofs=[0x3a67b0,0xb5413a,0x8d949a,0xd78c3d,0x4fa06b,0x6e7a85,0xc0a14a];
@@ -1709,7 +1752,8 @@ var info=[
  {id:"b14",n:"20",name:"ที่จอดรถครู",short:"จอดรถครู",desc:"โรงจอดรถข้างอาคาร 3"},
  {id:"hse_c",n:"21",name:"อาคารอเนกประสงค์ภารโรง",short:"อเนกประสงค์ภารโรง",desc:"ริมถนนด้านหลังอาคาร 3 ติดที่จอดรถนักเรียน"},
  {id:"hse_t",n:"22",name:"บ้านพักครู",short:"บ้านพักครู",desc:"แถวบ้านพักตามแนวถนนด้านตะวันตกของผัง และ 2 หลังใกล้ประตูหลัง"},
- {id:"b11",n:"23",name:"โรงอาหาร",short:"โรงอาหาร",desc:"ชั้นล่างโล่ง หลังคาสีน้ำตาลแดง ติดสนามฟุตบอล"}
+ {id:"b11",n:"23",name:"โรงอาหาร",short:"โรงอาหาร",desc:"ชั้นล่างโล่ง หลังคาสีน้ำตาลแดง ติดสนามฟุตบอล"},
+ {id:"khok",n:"ค",name:"สวนโคก หนอง นา (พื้นที่เสนอ)",short:"โคก หนอง นา",desc:"ติดสนามฟุตบอลด้านตะวันตก บ่อน้ำรูปตัว U ล้อมโคกสวนกล้วย ฐานของ U ขนานกับขอบสนาม ด้านเปิดหันออก มีบ่อปลาพร้อมศาลาทางทิศเหนือ และแปลงนาทางทิศใต้ ควรมีรั้วหรือป้ายเตือนรอบบ่อ เพราะนักเรียนอาจตกน้ำ"}
 ];
 var rooms={
  b2:[["ชั้น 2","121 ห้องภาษาไทย 1 · 124 ภาษาไทย 2 · 125 ภาษาไทย 3 · 126 ภาษาอังกฤษ 3 · 127 ภาษาอังกฤษ 2 · 128 ภาษาอังกฤษ 1 · ห้องน้ำกลางอาคาร"],["ชั้น 1","111 ห้องออมสิน · 112 ห้องลูกเสือ · 113 ห้องพัสดุ · 114 ห้องประชาสัมพันธ์ · 115 ห้องเรียนสีเขียว · ใต้ถุนอาคาร 1 (โล่ง)"],["บันได","2 จุด: ระหว่างห้อง 113 กับ 114 (มีห้องน้ำชั้น 2) และระหว่างใต้ถุนอาคารกับห้อง 115"]],
@@ -1931,6 +1975,7 @@ function showRooms(id){
   var bi=$("bIn");if(bi)bi.addEventListener("click",function(){openInside(id);});
 }
 function select(id){
+  if(document.body.classList.contains("panelhide")&&id)setPanel(true);
   if(/^[rf]:/.test(id))return;
   var p=pinById(id);if(!p)return;if(inside&&inside!==id)closeInside();if(inside===id){renderInsidePanel();return;}selRoom=null;selected=id;showRooms(id);drawRoutes();
   pinList.forEach(function(q){q.el.classList.toggle("sel",q.id===id);});
@@ -2157,6 +2202,9 @@ function bindSim(){
 /* ---------- loop ---------- */
 function resize(){var w=glEl.clientWidth||innerWidth,h=glEl.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 window.addEventListener("resize",function(){resize();dirty=true;});
+if(window.ResizeObserver)new ResizeObserver(function(){resize();dirty=true;}).observe(glEl);
+function setPanel(show){document.body.classList.toggle("panelhide",!show);var b=$("bPanel");b.setAttribute("aria-pressed",show?"false":"true");b.textContent=show?"เต็มจอ":"แสดงแผง";resize();dirty=true;}
+$("bPanel").addEventListener("click",function(){setPanel(document.body.classList.contains("panelhide"));});
 var v3=new THREE.Vector3(),last=performance.now(),lastDraw=0,needleEl=document.getElementById("needle"),scaleI=document.querySelector("#scalebar i"),scaleS=document.querySelector("#scalebar span");
 function frame(now){
   requestAnimationFrame(frame);
